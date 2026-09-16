@@ -1,0 +1,214 @@
+# ACE-Step for Mac — MLX
+
+**A complete front-end for [ACE-Step 1.5](https://github.com/ace-step/ACE-Step-1.5) on Apple Silicon, written for people who make music rather than people who write code.**
+
+Words in, a song out. Everything the model can actually be told — caption,
+lyrics, duration, tempo, key, time signature, seed — is on one page, in plain
+English, with the trade-off written **beside** each control instead of buried
+in a wiki. Nothing leaves your Mac.
+
+> This is an **unofficial** front-end. It is not made by or affiliated with the
+> ACE-Step team. It does not include the model.
+
+**[Installation, step by step, assuming no Terminal experience →](INSTALL.md)**
+· [Ce README en français →](README.fr.md)
+
+---
+
+## Why this exists
+
+ACE-Step 1.5 is a delight and it is also slightly wild. The first thing anyone
+notices is that it is *less obedient* than other music models: you describe
+something careful and it hands you something fresher and not quite what you
+asked for.
+
+That turns out to be a setting, not a personality. ACE-Step has a small
+language model that rewrites your caption before the audio model ever sees it.
+Nobody tells you this, and there is no obvious switch.
+
+So the first thing this front-end does is put that switch on the page, with
+three positions, including one that renders your track **twice on the same
+seed** — once as you typed it, once as the model rewrote it — so you can
+actually hear what the rewriting does.
+
+The rest of the app follows the same rule: **if a control does nothing, say
+so.** `Steps` is ignored by the Turbo model — verified byte-for-byte, identical
+output at 8 steps and at 60 — so the label says *(ignored by Turbo)* rather
+than letting you spend an afternoon adjusting it.
+
+---
+
+## What it does
+
+**Make music from words.** A caption, optional lyrics, and the structural
+controls the model genuinely accepts: a global key, a tempo (or a tempo range
+drawn per track), a time signature, a duration.
+
+**Cover audio you already have**, with a strength dial for how far to travel
+from the original.
+
+**Restore a track completely.** Every render writes a `.txt` beside it holding
+every setting used. Drop that file back on the page and the whole interface
+returns to that state — seed, caption, models, everything. Found something you
+like at 30 seconds? Drop, change duration, render it long.
+
+**Batches that stay editable.** Up to 50 tracks, and **every control is re-read
+at the start of every track**. Change the tempo, the caption, even the model,
+twenty minutes into a fifty-track run, and the change lands on the next track.
+Nothing has to be stopped and restarted.
+
+**Dynamic and sequential prompts**, detected automatically:
+
+```
+a {slow|fast} {piano|guitar} piece, {warm|cold}
+```
+
+draws one of each option per render, while blocks separated by a line of three
+or more dashes run in turn:
+
+```
+first idea
+---
+second idea
+```
+
+The two combine — the draw happens after the split, so each block gets its own.
+
+**Stems**, via [Demucs](https://github.com/adefossez/demucs), optional, in its
+own environment so it cannot disturb ACE-Step's pinned PyTorch.
+
+**MP3 and FLAC copies** alongside the WAV, via ffmpeg, also optional.
+
+**A per-track folder** holding the audio, the extra formats, the stems and the
+`.txt`. A named batch you can still find three days later.
+
+---
+
+## The three things worth knowing before your first render
+
+**1. In "As typed" mode with everything on Auto, the model gets no metadata at
+all.** Tempo and key are only ever computed inside the rewriting path. If you
+turn the rewriting off and leave BPM, key and time signature on Auto, the model
+is improvising every structural decision — which is exactly what produces the
+chaotic results people report. The app shows a warning bar when all three are
+on Auto. The fix is to set them yourself.
+
+**2. Writing "instrumental" in the lyrics box does not stop the singing.** The
+**Instrumental** checkbox does, by prepending an explicit refusal to the
+caption. It is on by default.
+
+**3. The caption is capped at 512 characters.** Past that, the model truncates.
+
+---
+
+## TEXTURES.txt
+
+Included in this repository: **62 prompts for textural sound**, separated by
+`---` and ready to paste straight into the caption box in sequential mode.
+Wind, trees, rain, storm, fire, footsteps, cannon, metal, weeping, empty
+buildings, and a run of things that cannot be identified at all.
+
+They are not really sound effects. This is a music model, and asked for a
+cannon it answers with a *texture*. That is the point — a minute of each makes
+remarkable backgrounds.
+
+To use them: open the file, copy all of it, paste into the caption, set
+duration 60, tracks 62, give the batch a name, Generate.
+
+---
+
+## Requirements
+
+| | |
+|---|---|
+| **Mac** | Apple Silicon — M1 or later. Intel Macs cannot run this. |
+| **Memory** | 16 GB works (use the 0.6B language model). 24 GB+ is comfortable. |
+| **Disk** | ~25 GB, of which 10–16 GB is model weights downloaded on first render. |
+| **macOS** | Sonoma (14) or later. |
+| **Also needed** | ACE-Step 1.5 itself — [INSTALL.md](INSTALL.md) covers it. |
+| **Optional** | ffmpeg (MP3/FLAC), Demucs (stems). |
+
+---
+
+## The controls, in order
+
+### Caption
+
+The description of the piece — not the lyrics. 512 characters maximum.
+
+**Caption handling** sits just below it:
+
+- **As typed** — your words go to the model untouched.
+- **Rewritten** — the language model expands them first, adding tempo, key and
+  time signature of its own.
+- **Both** — two renders on the same seed, one of each. This is how you compare.
+
+### Lyrics
+
+**Instrumental — no voice at all** is ticked by default. Untick it and the
+lyrics box opens, with a language selector.
+
+### Duration, tempo, key, time signature
+
+Duration in seconds; 0 lets the model decide. Tempo has two boxes — a value,
+and an upper bound if you want a range drawn per track; leave the second at 0
+for a fixed tempo. See warning 1 above about leaving key and time signature on
+Auto.
+
+### Models
+
+**Audio model.** *Turbo* is the fast one and the place to start. *SFT* finishes
+better and takes four to eight times longer. *Base* is the only one that
+accepts a CFG scale.
+
+**Language model.** *1.7B* is the good default. *0.6B* if you are tight on
+memory. *4B* is known to exhaust memory on macOS.
+
+**Run the audio model on MLX as well** — leave this ticked. It is the clean
+path: measured on the same seed, MLX produced 97 waveform discontinuities where
+PyTorch-MPS produced 3062. Untick it only if a render fails strangely.
+
+### Seed
+
+`-1` is random. A fixed seed replays the same piece. **Add 1 to the seed for
+each extra track** explores around an idea that works — same family, real
+variation.
+
+### Batches
+
+**Number of tracks**, up to 50. **Batch size** renders several at once, sharing
+the expensive part. **Batch name** names the folder — get into the habit, an
+unnamed run is one you cannot find later.
+
+---
+
+## Design notes
+
+A few decisions that are deliberate, in case they look like oversights:
+
+- **It imports ACE-Step's own handlers** and calls its own `generate_music`
+  rather than reimplementing anything, so it stays correct when that project
+  moves. That is why it must run inside ACE-Step's virtual environment.
+- **It filters the settings it sends.** If ACE-Step renames a field, you lose
+  that one setting and the log tells you which, instead of the app crashing.
+- **Demucs is deliberately in a separate environment.** It needs a different
+  PyTorch. Installing it alongside would break ACE-Step.
+- **Nothing is uploaded, ever.** There is no telemetry, no account, no network
+  call except the one that downloads the model weights.
+
+---
+
+## Licence
+
+MIT — see [LICENSE](LICENSE).
+
+The model is not included and is not covered by this licence. ACE-Step 1.5 is
+distributed separately under its own terms.
+
+---
+
+## Thanks
+
+To the [ACE-Step team](https://github.com/ace-step/ACE-Step-1.5) for the model
+and for supporting Apple Silicon properly, and to
+[Demucs](https://github.com/adefossez/demucs) for the stem separation.
