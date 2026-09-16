@@ -207,6 +207,19 @@ distributed separately under its own terms.
 
 ---
 
+## Who made this
+
+Jean-Pascal — **[Quick-Eyed Sky](https://www.youtube.com/@QuickEyedSky)** on
+YouTube, [QES](https://huggingface.co/QES) on Hugging Face. Not a programmer:
+this exists because the controls were not explained anywhere and I wanted to
+understand them.
+
+If it saved you an afternoon, you can
+[buy me a coffee](https://buymeacoffee.com/oFJ5CiY7n). Entirely optional, and
+the project stays exactly as free either way.
+
+---
+
 ## Thanks
 
 To the [ACE-Step team](https://github.com/ace-step/ACE-Step-1.5) for the model

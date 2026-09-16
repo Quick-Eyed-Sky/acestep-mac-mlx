@@ -214,6 +214,19 @@ est distribué séparément, sous ses propres termes.
 
 ---
 
+## Qui a fait ça
+
+Jean-Pascal — **[Quick-Eyed Sky](https://www.youtube.com/@QuickEyedSky)** sur
+YouTube, [QES](https://huggingface.co/QES) sur Hugging Face. Pas programmeur :
+ceci existe parce que les réglages n'étaient expliqués nulle part et que je
+voulais les comprendre.
+
+Si ça vous a épargné un après-midi, vous pouvez
+[m'offrir un café](https://buymeacoffee.com/oFJ5CiY7n). Entièrement facultatif,
+et le projet reste exactement aussi gratuit dans les deux cas.
+
+---
+
 ## Merci
 
 À [l'équipe ACE-Step](https://github.com/ace-step/ACE-Step-1.5) pour le modèle

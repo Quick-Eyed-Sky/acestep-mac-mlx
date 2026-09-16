@@ -163,11 +163,8 @@ cd ~/AceStep
 ```
 
 ```
-git clone https://github.com/REPLACE-ME/acestep-mac-mlx.git
+git clone https://github.com/Quick-Eyed-Sky/acestep-mac-mlx.git
 ```
-
-> The address above is filled in once this is published. If you are reading
-> this from the repository, use the address in your browser's address bar.
 
 ---
 
@@ -330,7 +327,7 @@ For people who already have `git`, `uv` and a Terminal habit:
 mkdir -p ~/AceStep && cd ~/AceStep
 git clone https://github.com/ace-step/ACE-Step-1.5.git
 cd ACE-Step-1.5 && uv sync
-cd ~/AceStep && git clone https://github.com/REPLACE-ME/acestep-mac-mlx.git
+cd ~/AceStep && git clone https://github.com/Quick-Eyed-Sky/acestep-mac-mlx.git
 chmod +x acestep-mac-mlx/launch_acestep.command
 open acestep-mac-mlx/launch_acestep.command
 ```

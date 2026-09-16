@@ -1,9 +1,2 @@
-# A "Sponsor" button on this repository's page.
-#
-# NOTHING IS ENABLED YET. Uncomment one line and replace the placeholder with
-# your own username, and GitHub puts the button at the top of the page.
-#
-# buy_me_a_coffee: your-username
-# ko_fi: your-username
-# github: your-github-username
-# custom: ["https://www.patreon.com/your-page"]
+# The "Sponsor" button at the top of this repository's page.
+buy_me_a_coffee: oFJ5CiY7n

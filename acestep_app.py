@@ -146,7 +146,7 @@ LYRICS_INFO = (
 )
 
 STEPS_INFO = (
-    "How many denoising passes. **Measured here on 15 September: on Turbo this changes "
+    "How many denoising passes. **Measured on an M4 Pro: on Turbo this changes "
     "nothing at all.** Same seed at 8, 16 and 24 steps produced three byte-identical files, "
     "while taking 43, 47 and 56 seconds - so the extra work is done and thrown away. The "
     "slider is therefore switched off on Turbo. Base and SFT do use it: 32 to 64 there."
@@ -163,27 +163,23 @@ CFG_INFO = (
 )
 
 LM_INFO = (
-    "These drive the **language model**, so they do nothing at all when caption handling is "
-    "'As typed' - there, it is bypassed. They are the equivalent of YuMusic's Harmonic "
-    "daring: they act on the stage where the decisions are made, before a note exists."
+    "These two matter only when the model is allowed to rewrite. On 'As typed' it is "
+    "bypassed and they do nothing at all."
 )
 
 LM_TEMP_INFO = (
-    "How adventurous the language model is when it chooses. Low: obvious, expected choices. "
-    "High: odd tempos, unusual keys, stranger rewrites. The repo ships 0.85."
+    "Low: obvious, expected choices. High: odd tempos, unusual keys, stranger rewrites. "
+    "Ships at 0.85."
 )
 
 LM_CFG_INFO = (
-    "How hard it is pushed **towards your words** and away from the negative prompt below. "
-    "Higher means it clings harder to what you wrote. This is an obedience dial at the "
-    "language-model stage - the counterweight to temperature. The repo ships 2.0."
+    "How hard it is held **to your words**, rather than to the negative prompt below. "
+    "Higher clings tighter. Ships at 2.0."
 )
 
 LM_PAIR_HINT = (
-    "**The combination worth trying: temperature high, caption fidelity high.** Wild, but "
-    "still anchored to your words - more ideas and more mistakes, without the model wandering "
-    "off and writing a different piece. Temperature high with fidelity low is where it stops "
-    "listening to you altogether."
+    "**Worth trying: both high.** Wild, but still anchored to what you wrote. Adventurous "
+    "high with fidelity low is where it stops listening to you altogether."
 )
 
 LM_NEG_INFO = (
@@ -201,18 +197,18 @@ TEMPO_INFO = (
 
 BATCH_INFO = (
     "Variants made in one pass, sharing the expensive language-model step - so four "
-    "variants cost far less than four tracks. It MULTIPLIES with the number of tracks, as "
-    "in Draw Things: 5 tracks at batch 4 is 20 files."
+    "variants cost far less than four tracks. It MULTIPLIES with the number of tracks: "
+    "5 tracks at batch 4 is 20 files."
 )
 
 COVER_INFO = (
     "How far from your original it goes. Low keeps the structure and re-dresses it; high "
-    "keeps little more than the outline. This is the one thing YuE2 cannot do at all."
+    "keeps little more than the outline."
 )
 
 DURATION_INFO = (
     "10 to 600 - the model's ceiling is ten minutes. 120 is a good default: a whole piece, "
-    "and it renders in a minute or two on this machine."
+    "and it renders in a minute or two on an M4 Pro."
 )
 
 LIVE_INFO = (
@@ -445,7 +441,7 @@ def safe_name(text):
 
 
 def write_sidecar(path, lines, caption, lyrics):
-    """The same habit as YuMusic: every track carries its own settings beside
+    """Every track carries its own settings beside
     it, so anything you liked is reproducible six months later."""
     body = [f"AceStep {VERSION} - {MODEL_FAMILY}",
             f"Generated: {time.strftime('%Y%m%d-%H%M%S')}"] + list(lines)
@@ -475,7 +471,7 @@ def set_finder_label(path, colour):
 
 
 def convert_audio(src, want_mp3, want_flac):
-    """Optional MP3/FLAC beside the rendered file, the same habit as YuMusic."""
+    """Optional MP3/FLAC beside the rendered file."""
     saved, warning = [], None
     if not (want_mp3 or want_flac):
         return saved, None
@@ -650,17 +646,25 @@ def total_renders(tracks, batch, caption_mode):
 
 
 def estimate(tracks, batch, caption_mode, duration, dit_label, steps):
-    """Roughly: about 1 minute per 2 minutes of audio on Turbo, measured here,
-    and a batch shares the language-model half."""
+    """Every render costs a fixed amount before a single second of audio is
+    made - the language-model pass, loading, decoding - and only then a cost
+    proportional to the length. The first version of this ignored the fixed
+    part, so eighty 30-second tracks were quoted at 14 minutes and took 40.
+
+    Fitted to measurements on an M4 Pro: 30 s of audio on Turbo at batch 4
+    comes out at about 30 seconds per file."""
     n = total_renders(tracks, batch, caption_mode)
     dur = float(duration) if duration and float(duration) > 0 else 120.0
-    per = dur * (0.5 if DIT_MODELS[dit_label] == "acestep-v15-turbo" else 2.0)
-    per *= max(0.5, float(steps) / 8.0) if DIT_MODELS[dit_label] == "acestep-v15-turbo" else 1.0
+    turbo = DIT_MODELS[dit_label] == "acestep-v15-turbo"
+    per = 28.0 + dur * (0.20 if turbo else 0.90)
+    if turbo:
+        per *= max(0.6, float(steps) / 8.0)
     if int(batch) > 1:
-        per *= 0.7                       # the LM step is paid once for the batch
+        per *= 0.9                       # the LM step is paid once for the batch
     total = n * per
     return (f"This run will render **{n} file{'s' if n != 1 else ''}** - roughly "
-            f"{clock(total)}, give or take.")
+            f"{clock(total)}. This is a guess from the settings; once the run starts, "
+            f"the estimate in the progress bar is measured and far better.")
 
 
 # ------------------------------------------------------------- diagnostics --
@@ -971,7 +975,7 @@ CSS = """
 
 def labelled(title, info, factory, text_scale=2, control_scale=3):
     """Explanation on the left, control on the right - the same block the
-    YuMusic apps use, so the two tools read the same way."""
+    same shape every time, so the files read the same way."""
     with gr.Row(equal_height=True):
         with gr.Column(scale=text_scale, min_width=0):
             gr.Markdown(f"**{title}**  \n{info}")
@@ -980,12 +984,11 @@ def labelled(title, info, factory, text_scale=2, control_scale=3):
     return component
 
 
-with gr.Blocks(title="AceStep 1") as demo:
+with gr.Blocks(title="ACE-Step for Mac") as demo:
     gr.Markdown(
         f"## AceStep {VERSION}\n"
         f"Words in, a song out - or a cover of audio you already have. Straight generation "
-        f"only: this model takes no chords, no melody and no MIDI, so there is nothing "
-        f"symbolic to rewrite.\n\n"
+        f"only: this model takes no chords, no melody and no MIDI.\n\n"
         f"Model: **{MODEL_FAMILY}** - Apple Silicon build, language model on MLX. Tracks "
         f"are saved to `{OUTPUT_DIR}` and marked **blue** in the Finder."
     )
@@ -1034,7 +1037,7 @@ with gr.Blocks(title="AceStep 1") as demo:
             gr.Markdown(f"*{CAPTION_MODE_INFO}*")
 
             with gr.Group(visible=False) as lm_group:
-                gr.Markdown("#### How the language model behaves")
+                gr.Markdown("#### How it rewrites")
                 gr.Markdown(f"*{LM_INFO}*")
                 lm_temperature = labelled(
                     "Adventurousness", LM_TEMP_INFO,
@@ -1091,7 +1094,7 @@ with gr.Blocks(title="AceStep 1") as demo:
             use_mlx_dit = gr.Checkbox(
                 value=True, label="Run the audio model on MLX as well as the language model")
             gr.Markdown(
-                "*Leave this on. Measured here on 15 September, same seed and settings: MLX "
+                "*Leave this on. Measured on an M4 Pro, same seed and settings: MLX "
                 "gave 97 waveform discontinuities and 3.3% of its energy above 12 kHz; the "
                 "PyTorch MPS path gave **3062** discontinuities and 0.27% - thirty times "
                 "rougher and far duller. Untick it only if a render actually fails.*")
@@ -1131,10 +1134,6 @@ with gr.Blocks(title="AceStep 1") as demo:
                 label="Also split into stems (drums, bass, vocals, other)"
                       + ("" if demucs_available() else " - Demucs not installed"))
             gr.Markdown(f"*{STEMS_INFO}*")
-            gr.Markdown(
-                "*MIDI is not possible here, and it is worth knowing why: YuE2 writes a "
-                "score before it makes audio, so there is something to convert. ACE-Step "
-                "goes straight to sound - there is no score to export.*")
 
     gr.Markdown("### Results")
     audio_out = gr.Audio(label="Latest track", type="filepath")
