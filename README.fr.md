@@ -84,11 +84,11 @@ deuxième idée
 **Une différence avec Draw Things, qu'il vaut mieux connaître.** Là-bas, le
 nombre d'images est décidé par le nombre de blocs. Ici non : le nombre de
 morceaux reste un réglage à part, parce qu'on peut très bien vouloir trois
-rendus de chaque version plutôt qu'un seul. Une feuille de 62 versions avec le
-curseur sur 10 vous donne donc les dix premières et rien d'autre.
+rendus de chaque version plutôt qu'un seul. Une feuille de vingt versions avec le
+curseur sur cinq vous donne donc les cinq premières et rien d'autre.
 
 Pour vous épargner le calcul, **un bouton apparaît sous la case dès qu'un
-prompt séquentiel est détecté** — *Set the number of tracks to 62* — et le règle
+prompt séquentiel est détecté** — *Set the number of tracks to 20* — et le règle
 pour vous. Au-delà du nombre de versions, ça repart simplement du début.
 
 Les deux modes se combinent : le tirage se fait après le découpage, donc chaque
@@ -119,23 +119,6 @@ remède : les régler vous-même.
 Elle est cochée par défaut.
 
 **3. La description est plafonnée à 512 caractères.** Au-delà, le modèle coupe.
-
----
-
-## 🌬️ TEXTURES.txt
-
-Inclus dans ce dépôt : **62 descriptions de textures sonores**, séparées par
-`---` et prêtes à coller telles quelles dans la case description, en mode
-séquentiel. Vent, arbres, pluie, orage, feu, pas, canon, métal, pleurs,
-bâtiments vides, et une série de choses parfaitement non identifiables.
-
-Ce ne sont pas vraiment des bruitages. C'est un modèle de musique : quand on
-lui demande un canon, il répond par une **texture**. C'est tout l'intérêt — une
-minute de chacune fait des fonds remarquables.
-
-Utilisation : ouvrir le fichier, tout copier, coller dans la description,
-durée 60, cliquer sur le bouton **Set the number of tracks to 62** qui apparaît,
-nommer le lot, Generate.
 
 ---
 

@@ -82,11 +82,11 @@ second idea
 **One difference from Draw Things, worth knowing.** There, the number of images
 is decided by the number of blocks. Here it is not: the number of tracks stays
 a separate setting, because you may well want three renders of each version
-rather than one. So a sheet of 62 versions with the tracks slider at 10 gives
-you the first ten and nothing else.
+rather than one. So a sheet of twenty versions with the tracks slider at
+five gives you the first five and nothing else.
 
 To spare you the arithmetic, **a button appears under the box the moment a
-sequential prompt is detected** — *Set the number of tracks to 62* — and sets
+sequential prompt is detected** — *Set the number of tracks to 20* — and sets
 it for you. Go past the number of versions and it simply starts again from the
 top.
 
@@ -117,23 +117,6 @@ on Auto. The fix is to set them yourself.
 caption. It is on by default.
 
 **3. The caption is capped at 512 characters.** Past that, the model truncates.
-
----
-
-## 🌬️ TEXTURES.txt
-
-Included in this repository: **62 prompts for textural sound**, separated by
-`---` and ready to paste straight into the caption box in sequential mode.
-Wind, trees, rain, storm, fire, footsteps, cannon, metal, weeping, empty
-buildings, and a run of things that cannot be identified at all.
-
-They are not really sound effects. This is a music model, and asked for a
-cannon it answers with a *texture*. That is the point — a minute of each makes
-remarkable backgrounds.
-
-To use them: open the file, copy all of it, paste into the caption, set
-duration 60, click the **Set the number of tracks to 62** button that appears,
-give the batch a name, Generate.
 
 ---
 
