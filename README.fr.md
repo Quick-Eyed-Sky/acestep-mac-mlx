@@ -19,7 +19,7 @@ réglage plutôt qu'enterré dans un wiki. Rien ne sort de votre Mac.
 
 ---
 
-## Pourquoi cette interface
+## 🤔 Pourquoi cette interface
 
 ACE-Step 1.5 est réjouissant, et il est aussi un peu sauvage. La première chose
 qu'on remarque, c'est qu'il est **moins obéissant** que les autres modèles de
@@ -42,7 +42,7 @@ laisser y passer un après-midi.
 
 ---
 
-## Ce qu'elle fait
+## 🎛️ Ce qu'elle fait
 
 **Fabriquer de la musique à partir de mots.** Une description, des paroles
 éventuelles, et les contrôles de structure que le modèle accepte vraiment :
@@ -63,14 +63,17 @@ est relu au début de chaque morceau**. On change le tempo, la description, mêm
 le modèle, vingt minutes après le début d'un lot de cinquante : le changement
 s'applique au morceau suivant. Rien à arrêter ni à relancer.
 
-**Prompts dynamiques et séquentiels**, détectés automatiquement :
+**Prompts dynamiques et séquentiels**, détectés automatiquement, avec le mode
+annoncé sous la case au fur et à mesure que vous tapez.
+
+🎲 **Dynamique.** Une option tirée par rendu, fraîche à chaque fois :
 
 ```
 a {slow|fast} {piano|guitar} piece, {warm|cold}
 ```
 
-tire une option de chaque à chaque rendu, tandis que les blocs séparés par une
-ligne de **trois tirets ou plus** passent chacun leur tour :
+🔁 **Séquentiel.** Des versions complètes séparées par une ligne de trois
+tirets ou plus, utilisées une par morceau, dans l'ordre :
 
 ```
 première idée
@@ -78,8 +81,18 @@ première idée
 deuxième idée
 ```
 
-Les deux se combinent : le tirage se fait après le découpage, donc chaque bloc
-a le sien.
+**Une différence avec Draw Things, qu'il vaut mieux connaître.** Là-bas, le
+nombre d'images est décidé par le nombre de blocs. Ici non : le nombre de
+morceaux reste un réglage à part, parce qu'on peut très bien vouloir trois
+rendus de chaque version plutôt qu'un seul. Une feuille de 62 versions avec le
+curseur sur 10 vous donne donc les dix premières et rien d'autre.
+
+Pour vous épargner le calcul, **un bouton apparaît sous la case dès qu'un
+prompt séquentiel est détecté** — *Set the number of tracks to 62* — et le règle
+pour vous. Au-delà du nombre de versions, ça repart simplement du début.
+
+Les deux modes se combinent : le tirage se fait après le découpage, donc chaque
+bloc a le sien.
 
 **Les stems**, via [Demucs](https://github.com/adefossez/demucs), en option,
 dans son propre environnement pour ne pas perturber le PyTorch d'ACE-Step.
@@ -91,7 +104,7 @@ et le `.txt`. Un lot nommé, c'est un lot qu'on retrouve trois jours plus tard.
 
 ---
 
-## Trois choses à savoir avant le premier rendu
+## ⚠️ Trois choses à savoir avant le premier rendu
 
 **1. En mode « As typed » avec tout sur Auto, aucune métadonnée n'atteint le
 modèle.** Le tempo et la tonalité ne sont calculés que dans le chemin de
@@ -109,7 +122,7 @@ Elle est cochée par défaut.
 
 ---
 
-## TEXTURES.txt
+## 🌬️ TEXTURES.txt
 
 Inclus dans ce dépôt : **62 descriptions de textures sonores**, séparées par
 `---` et prêtes à coller telles quelles dans la case description, en mode
@@ -121,11 +134,12 @@ lui demande un canon, il répond par une **texture**. C'est tout l'intérêt —
 minute de chacune fait des fonds remarquables.
 
 Utilisation : ouvrir le fichier, tout copier, coller dans la description,
-durée 60, 62 morceaux, nommer le lot, Generate.
+durée 60, cliquer sur le bouton **Set the number of tracks to 62** qui apparaît,
+nommer le lot, Generate.
 
 ---
 
-## Ce qu'il faut
+## 🍏 Ce qu'il faut
 
 | | |
 |---|---|
@@ -138,7 +152,7 @@ durée 60, 62 morceaux, nommer le lot, Generate.
 
 ---
 
-## Mesuré sur un M4 Pro (64 Go)
+## ⏱️ Mesuré sur un M4 Pro (64 Go)
 
 De vrais chiffres, pas des estimations. Votre Mac sera différent, mais la forme
 reste : **chaque rendu paie un coût fixe avant la moindre seconde d'audio**,
@@ -158,7 +172,7 @@ pourquoi MLX est le défaut.
 
 ---
 
-## Les réglages, dans l'ordre
+## 🎚️ Les réglages, dans l'ordre
 
 ### Description (Caption)
 
@@ -206,13 +220,13 @@ vraies variations.
 
 ### Lots
 
-**Number of tracks**, jusqu'à 50. **Batch size** en rend plusieurs à la fois en
+**Number of tracks**, jusqu'à 100. **Batch size** en rend plusieurs à la fois en
 partageant la partie coûteuse. **Batch name** nomme le dossier — prenez
 l'habitude, un lot sans nom est un lot perdu.
 
 ---
 
-## Notes de conception
+## 🔧 Notes de conception
 
 Quelques décisions volontaires, au cas où elles ressembleraient à des oublis :
 
@@ -229,7 +243,7 @@ Quelques décisions volontaires, au cas où elles ressembleraient à des oublis 
 
 ---
 
-## Licences et attribution
+## 📜 Licences et attribution
 
 **Cette interface** est en MIT — voir [LICENSE](LICENSE). Faites-en ce que vous
 voulez.
@@ -253,7 +267,7 @@ ne passe par moi ni par personne.
 
 ---
 
-## Qui a fait ça
+## 👋 Qui a fait ça
 
 Jean-Pascal — **[Quick-Eyed Sky](https://www.youtube.com/@QuickEyedSky)** sur
 YouTube, [QES](https://huggingface.co/QES) sur Hugging Face. Pas programmeur :
@@ -266,7 +280,7 @@ et le projet reste exactement aussi gratuit dans les deux cas.
 
 ---
 
-## Merci
+## 🙏 Merci
 
 À [l'équipe ACE-Step](https://github.com/ace-step/ACE-Step-1.5) pour le modèle
 et pour avoir pris Apple Silicon au sérieux, et à

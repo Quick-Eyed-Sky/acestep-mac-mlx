@@ -11,7 +11,7 @@ something else.
 
 ---
 
-## Before you start: does your Mac qualify?
+## 🍏 Before you start: does your Mac qualify?
 
 **It must be an Apple Silicon Mac.** M1, M2, M3, M4, any of them, including the
 Pro / Max / Ultra variants. An older Intel Mac cannot run this at all — MLX is
@@ -34,7 +34,7 @@ To check: **Apple menu → About This Mac → More Info → Storage**.
 
 ---
 
-## Step 0 — Opening Terminal, and what it is
+## 0️⃣ Opening Terminal, and what it is
 
 Terminal is an app that comes with every Mac. It lets you type instructions
 instead of clicking them. It looks alarming and it is not.
@@ -58,7 +58,7 @@ Two things worth knowing before you are surprised by them:
 
 ---
 
-## Step 1 — Apple's developer tools
+## 1️⃣ Apple's developer tools
 
 The `git` command, which downloads code, is not on a fresh Mac until you ask
 for it. Type this:
@@ -73,7 +73,7 @@ answers `command line tools are already installed`, which is equally fine.
 
 ---
 
-## Step 2 — uv, which manages Python for you
+## 2️⃣ uv, which manages Python for you
 
 ACE-Step uses a tool called **uv** to build its own private Python environment.
 That word "private" is the point: nothing here touches the Python your Mac
@@ -100,7 +100,7 @@ did not open a *new* window. Try that first.
 
 ---
 
-## Step 3 — Downloading ACE-Step itself
+## 3️⃣ Downloading ACE-Step itself
 
 This is the model's own project, not mine. Three commands:
 
@@ -122,7 +122,7 @@ inside that. You can see it in Finder: **Go menu → Home**.
 
 ---
 
-## Step 4 — Building the environment
+## 4️⃣ Building the environment
 
 ```
 cd ~/AceStep/ACE-Step-1.5
@@ -146,7 +146,7 @@ picks up where it left off.
 
 ---
 
-## Step 5 — Downloading this front-end
+## 5️⃣ Downloading this front-end
 
 Two ways. Pick one.
 
@@ -168,7 +168,7 @@ git clone https://github.com/Quick-Eyed-Sky/acestep-mac-mlx.git
 
 ---
 
-## Step 6 — Letting the launcher launch
+## 6️⃣ Letting the launcher launch
 
 **If you used the ZIP, this step is required.** A ZIP file forgets which files
 are allowed to run, so the launcher arrives inert and double-clicking it opens
@@ -188,7 +188,7 @@ Nothing is printed. That means it worked.
 
 ---
 
-## Step 7 — The first launch, and Apple's warning
+## 7️⃣ The first launch, and Apple's warning
 
 Double-click **launch_acestep.command**.
 
@@ -211,7 +211,7 @@ That address is your own Mac talking to itself. Nothing is being sent anywhere.
 
 ---
 
-## Step 8 — The first render, which is slow, once
+## 8️⃣ The first render, which is slow, once
 
 Type something in the caption box — `slow piano, rain, night` will do — and
 click **Generate**.
@@ -229,11 +229,11 @@ what it cannot.
 
 ---
 
-## Optional extras
+## ➕ Optional extras
 
 Neither is required. The app works without both and says so where it matters.
 
-### ffmpeg — for MP3 and FLAC copies
+### 🎚️ ffmpeg — for MP3 and FLAC copies
 
 Without it you still get WAV, which is the real output. ffmpeg only makes the
 extra copies.
@@ -255,7 +255,7 @@ Then:
 brew install ffmpeg
 ```
 
-### Demucs — for splitting a finished track into stems
+### 🥁 Demucs — for splitting a finished track into stems
 
 Drums, bass, vocals and everything else, as four separate files.
 
@@ -278,21 +278,21 @@ stems checkbox stops being greyed out.
 
 ---
 
-## If something goes wrong
+## 🆘 If something goes wrong
 
 | What you see | What it means |
 |---|---|
-| `command not found: uv` | Step 2 did not finish, or you did not open a **new** Terminal window afterwards. |
-| `Can't find ACE-Step's virtual environment` | Step 4 did not finish. Go back to `~/AceStep/ACE-Step-1.5` and run `uv sync` again, then read the **last** error line. |
-| Double-clicking the launcher opens a text editor | Step 6. The executable bit was lost in the ZIP. |
-| `unidentified developer` | Step 7. Right-click → Open. |
+| `command not found: uv` | Step 2️⃣ did not finish, or you did not open a **new** Terminal window afterwards. |
+| `Can't find ACE-Step's virtual environment` | Step 4️⃣ did not finish. Go back to `~/AceStep/ACE-Step-1.5` and run `uv sync` again, then read the **last** error line. |
+| Double-clicking the launcher opens a text editor | Step 6️⃣. The executable bit was lost in the ZIP. |
+| `unidentified developer` | Step 7️⃣. Right-click → Open. |
 | An out-of-memory error during a render | Set the language model to **0.6B**, the audio model to **Turbo**, and shorten the duration. |
 | `Abort trap: 6` | A known clash between MLX and PyTorch-MPS on some machines. Run it again. If it happens every time, untick **Run the audio model on MLX as well** — slower, but it works. |
 | Anything else | Click **Check the installation** and paste its report into an issue. It contains everything needed to answer you. |
 
 ---
 
-## Installing somewhere other than the internal disk
+## 💾 Installing somewhere other than the internal disk
 
 Everything above puts ACE-Step in your home folder. To put it on an external
 drive instead, set two environment variables before launching:
@@ -311,7 +311,7 @@ worse than an internal disk that is 20% full, however large it is.
 
 ---
 
-## Removing all of this
+## 🗑️ Removing all of this
 
 Delete the folder `~/AceStep` and the folder you unzipped this into. That is
 everything: no system files are touched, nothing is installed globally except
@@ -319,7 +319,7 @@ everything: no system files are touched, nothing is installed globally except
 
 ---
 
-## The short version
+## ⚡ The short version
 
 For people who already have `git`, `uv` and a Terminal habit:
 

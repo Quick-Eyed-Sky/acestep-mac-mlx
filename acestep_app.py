@@ -45,6 +45,7 @@ import gradio as gr
 
 VERSION = "1.6"
 MODEL_FAMILY = "ACE-Step 1.5"
+MAX_TRACKS = 100
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 OUTPUT_DIR = SCRIPT_DIR / "outputs"
@@ -253,13 +254,24 @@ def prompt_mode_note(label, text):
         n = len(split_sequential(text))
         extra = (" Braces inside each version are still resolved."
                  if _WILDCARD_RE.search(text or "") else "")
-        return (f"**{label}: sequential** - {n} version{'s' if n != 1 else ''}, one per "
-                f"track, looping when the batch is longer.{extra}")
+        return (f"\N{CLOCKWISE RIGHTWARDS AND LEFTWARDS OPEN CIRCLE ARROWS} "
+                f"**{label}: sequential** - {n} version{'s' if n != 1 else ''}, one per "
+                f"track, in order. **The number of tracks is a separate setting**, further "
+                f"down: set it to {n} for one render of each. Fewer, and the versions past "
+                f"that are never used; more, and it starts again from the top.{extra}")
     if mode == "Dynamic":
         n = len(_WILDCARD_RE.findall(text or ""))
-        return (f"**{label}: dynamic** - {n} `{{a|b}}` choice{'s' if n != 1 else ''}, "
-                f"drawn fresh for every track.")
-    return f"**{label}: fixed** - used exactly as typed for every track."
+        return (f"\N{GAME DIE} **{label}: dynamic** - {n} `{{a|b}}` "
+                f"choice{'s' if n != 1 else ''}, drawn fresh for every track.")
+    return f"\N{PAGE FACING UP} **{label}: fixed** - used exactly as typed for every track."
+
+
+def seq_button(text):
+    """Visible only for a sequential prompt, and it says the number it will set."""
+    if detect_prompt_mode(text) != "Sequential":
+        return gr.update(visible=False)
+    n = min(MAX_TRACKS, len(split_sequential(text)))
+    return gr.update(visible=True, value=f"Set the number of tracks to {n}")
 
 
 def resolve_prompt(text, track_index):
@@ -270,9 +282,12 @@ def resolve_prompt(text, track_index):
 
 
 PROMPT_HELP = (
-    "The prompt tells us how to treat it - there is nothing to choose. Plain text is used "
-    "as typed. `{bright|dark}` picks one at random per track. Several complete versions "
-    "separated by a line containing only `---` are used one per track, in order, looping."
+    "The prompt tells us how to treat it - there is nothing to choose.\n\n"
+    "\N{PAGE FACING UP} Plain text is used exactly as typed, for every track.\n\n"
+    "\N{GAME DIE} `{bright|dark}` picks one at random, fresh for every track.\n\n"
+    "\N{CLOCKWISE RIGHTWARDS AND LEFTWARDS OPEN CIRCLE ARROWS} Complete versions separated "
+    "by a line of three dashes or more are used one per track, in order. The number of "
+    "tracks stays your choice - a button appears to line the two up."
 )
 
 
@@ -716,7 +731,7 @@ def check_installation():
         ok = False
         lines.append(f"- Import failed:\n\n```\n{exc}\n```")
 
-    lines.insert(0, "### Everything is in place\n" if ok else "### Something is missing\n")
+    lines.insert(0, "### \N{WHITE HEAVY CHECK MARK} Everything is in place\n" if ok else "### \N{WARNING SIGN} Something is missing\n")
     return "\n".join(lines)
 
 
@@ -742,7 +757,7 @@ def generate(job_mode, dit_label, lm_label, use_mlx_dit, caption, lyrics, instru
     def say(msg):
         log.append(msg)
 
-    n = max(1, min(50, int(num_tracks)))            # fixed once we start
+    n = max(1, min(MAX_TRACKS, int(num_tracks)))    # fixed once we start
     total = total_renders(n, now("batch_size", 1), now("caption_mode", AS_TYPED))
 
     def tick(label):
@@ -1017,7 +1032,7 @@ with gr.Blocks(title="ACE-Step for Mac") as demo:
     with gr.Row():
         with gr.Column():
             with gr.Group(visible=False) as cover_group:
-                gr.Markdown("### The audio to cover")
+                gr.Markdown("### \N{MUSICAL NOTE} The audio to cover")
                 src_audio = gr.Audio(label="Drop a track", type="filepath")
                 cover_strength = labelled(
                     "How far from the original", COVER_INFO,
@@ -1026,18 +1041,19 @@ with gr.Blocks(title="ACE-Step for Mac") as demo:
                 gr.Markdown("*The caption below still applies: it says what to turn the "
                             "track into.*")
 
-            gr.Markdown("### What to make")
+            gr.Markdown("### \N{PENCIL} What to make")
             gr.Markdown(f"*{PROMPT_HELP}*")
             caption = gr.Textbox(label="Caption", lines=5, elem_classes=["resizable"],
                                  placeholder="Dream pop, warm analog synths, brushed drums, "
                                              "female vocal, hazy and unhurried",
                                  info=CAPTION_INFO)
             caption_note = gr.Markdown(prompt_mode_note("Caption", ""))
+            seq_btn = gr.Button("Set the number of tracks", size="sm", visible=False)
             caption_mode = gr.Radio(CAPTION_MODES, value=AS_TYPED, label="Caption handling")
             gr.Markdown(f"*{CAPTION_MODE_INFO}*")
 
             with gr.Group(visible=False) as lm_group:
-                gr.Markdown("#### How it rewrites")
+                gr.Markdown("#### \N{SPARKLES} How it rewrites")
                 gr.Markdown(f"*{LM_INFO}*")
                 lm_temperature = labelled(
                     "Adventurousness", LM_TEMP_INFO,
@@ -1067,7 +1083,7 @@ with gr.Blocks(title="ACE-Step for Mac") as demo:
             language = gr.Dropdown(list(LANGUAGES), value="Auto - detect from the lyrics",
                                    label="Sung language", visible=False)
 
-            gr.Markdown("### Shape")
+            gr.Markdown("### \N{TRIANGULAR RULER} Shape")
             gr.Markdown("*The only structural controls this model takes. Every one can be "
                         "left on Auto, and the model will choose.*")
             with gr.Row():
@@ -1087,7 +1103,7 @@ with gr.Blocks(title="ACE-Step for Mac") as demo:
                                       label="Time signature", scale=2)
 
         with gr.Column():
-            gr.Markdown("### How to render it")
+            gr.Markdown("### \N{CONTROL KNOBS} How to render it")
             dit_label = gr.Dropdown(list(DIT_MODELS), value=DEFAULT_DIT, label="Audio model")
             lm_label = gr.Dropdown(list(LM_MODELS), value=DEFAULT_LM,
                                    label="Language model (writes the metadata)")
@@ -1117,8 +1133,8 @@ with gr.Blocks(title="ACE-Step for Mac") as demo:
                                     label="Add 1 to the seed for each extra track "
                                           "(ignored while the seed is -1)")
 
-            gr.Markdown("### How many")
-            num_tracks = gr.Slider(1, 50, value=1, step=1, label="Number of tracks")
+            gr.Markdown("### \N{INPUT SYMBOL FOR NUMBERS} How many")
+            num_tracks = gr.Slider(1, MAX_TRACKS, value=1, step=1, label="Number of tracks")
             batch_size = labelled("Batch size", BATCH_INFO,
                                   lambda: gr.Slider(1, 8, value=1, step=1, label="Batch size",
                                                     show_label=False))
@@ -1135,7 +1151,7 @@ with gr.Blocks(title="ACE-Step for Mac") as demo:
                       + ("" if demucs_available() else " - Demucs not installed"))
             gr.Markdown(f"*{STEMS_INFO}*")
 
-    gr.Markdown("### Results")
+    gr.Markdown("### \N{SPEAKER WITH THREE SOUND WAVES} Results")
     audio_out = gr.Audio(label="Latest track", type="filepath")
     files_out = gr.Textbox(label="Files saved this run", lines=4)
     log_out = gr.Textbox(label="Log", lines=14, max_lines=40)
@@ -1209,6 +1225,9 @@ with gr.Blocks(title="ACE-Step for Mac") as demo:
 
     caption.change(lambda v: prompt_mode_note("Caption", v),
                    inputs=caption, outputs=caption_note)
+    caption.change(seq_button, inputs=caption, outputs=seq_btn)
+    seq_btn.click(lambda v: min(MAX_TRACKS, len(split_sequential(v))),
+                  inputs=caption, outputs=num_tracks)
     lyrics.change(lambda v: prompt_mode_note("Lyrics", v), inputs=lyrics, outputs=lyrics_note)
 
     def steps_for(dit):

@@ -19,7 +19,7 @@ in a wiki. Nothing leaves your Mac.
 
 ---
 
-## Why this exists
+## 🤔 Why this exists
 
 ACE-Step 1.5 is a delight and it is also slightly wild. The first thing anyone
 notices is that it is *less obedient* than other music models: you describe
@@ -42,7 +42,7 @@ than letting you spend an afternoon adjusting it.
 
 ---
 
-## What it does
+## 🎛️ What it does
 
 **Make music from words.** A caption, optional lyrics, and the structural
 controls the model genuinely accepts: a global key, a tempo (or a tempo range
@@ -61,14 +61,17 @@ at the start of every track**. Change the tempo, the caption, even the model,
 twenty minutes into a fifty-track run, and the change lands on the next track.
 Nothing has to be stopped and restarted.
 
-**Dynamic and sequential prompts**, detected automatically:
+**Dynamic and sequential prompts**, detected automatically, with the mode named
+under the box as you type.
+
+🎲 **Dynamic.** One option drawn per render, fresh every time:
 
 ```
 a {slow|fast} {piano|guitar} piece, {warm|cold}
 ```
 
-draws one of each option per render, while blocks separated by a line of three
-or more dashes run in turn:
+🔁 **Sequential.** Complete versions separated by a line of three or more
+dashes, used one per track, in order:
 
 ```
 first idea
@@ -76,7 +79,19 @@ first idea
 second idea
 ```
 
-The two combine — the draw happens after the split, so each block gets its own.
+**One difference from Draw Things, worth knowing.** There, the number of images
+is decided by the number of blocks. Here it is not: the number of tracks stays
+a separate setting, because you may well want three renders of each version
+rather than one. So a sheet of 62 versions with the tracks slider at 10 gives
+you the first ten and nothing else.
+
+To spare you the arithmetic, **a button appears under the box the moment a
+sequential prompt is detected** — *Set the number of tracks to 62* — and sets
+it for you. Go past the number of versions and it simply starts again from the
+top.
+
+The two modes combine: the draw happens after the split, so each block gets its
+own.
 
 **Stems**, via [Demucs](https://github.com/adefossez/demucs), optional, in its
 own environment so it cannot disturb ACE-Step's pinned PyTorch.
@@ -88,7 +103,7 @@ own environment so it cannot disturb ACE-Step's pinned PyTorch.
 
 ---
 
-## The three things worth knowing before your first render
+## ⚠️ The three things worth knowing before your first render
 
 **1. In "As typed" mode with everything on Auto, the model gets no metadata at
 all.** Tempo and key are only ever computed inside the rewriting path. If you
@@ -105,7 +120,7 @@ caption. It is on by default.
 
 ---
 
-## TEXTURES.txt
+## 🌬️ TEXTURES.txt
 
 Included in this repository: **62 prompts for textural sound**, separated by
 `---` and ready to paste straight into the caption box in sequential mode.
@@ -117,11 +132,12 @@ cannon it answers with a *texture*. That is the point — a minute of each makes
 remarkable backgrounds.
 
 To use them: open the file, copy all of it, paste into the caption, set
-duration 60, tracks 62, give the batch a name, Generate.
+duration 60, click the **Set the number of tracks to 62** button that appears,
+give the batch a name, Generate.
 
 ---
 
-## Requirements
+## 🍏 Requirements
 
 | | |
 |---|---|
@@ -134,7 +150,7 @@ duration 60, tracks 62, give the batch a name, Generate.
 
 ---
 
-## Measured on an M4 Pro (64 GB)
+## ⏱️ Measured on an M4 Pro (64 GB)
 
 Real numbers from real runs, not estimates. Your Mac will differ, but the
 shape holds: **every render pays a fixed cost before a single second of audio
@@ -153,7 +169,7 @@ passes are computed and thrown away. The fourth is why MLX is the default.
 
 ---
 
-## The controls, in order
+## 🎚️ The controls, in order
 
 ### Caption
 
@@ -199,13 +215,13 @@ variation.
 
 ### Batches
 
-**Number of tracks**, up to 50. **Batch size** renders several at once, sharing
+**Number of tracks**, up to 100. **Batch size** renders several at once, sharing
 the expensive part. **Batch name** names the folder — get into the habit, an
 unnamed run is one you cannot find later.
 
 ---
 
-## Design notes
+## 🔧 Design notes
 
 A few decisions that are deliberate, in case they look like oversights:
 
@@ -221,7 +237,7 @@ A few decisions that are deliberate, in case they look like oversights:
 
 ---
 
-## Licences and attribution
+## 📜 Licences and attribution
 
 **This front-end** is MIT — see [LICENSE](LICENSE). Do what you like with it.
 
@@ -244,7 +260,7 @@ passes through me or anyone else.
 
 ---
 
-## Who made this
+## 👋 Who made this
 
 Jean-Pascal — **[Quick-Eyed Sky](https://www.youtube.com/@QuickEyedSky)** on
 YouTube, [QES](https://huggingface.co/QES) on Hugging Face. Not a programmer:
@@ -257,7 +273,7 @@ the project stays exactly as free either way.
 
 ---
 
-## Thanks
+## 🙏 Thanks
 
 To the [ACE-Step team](https://github.com/ace-step/ACE-Step-1.5) for the model
 and for supporting Apple Silicon properly, and to
