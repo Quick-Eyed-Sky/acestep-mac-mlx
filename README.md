@@ -7,6 +7,10 @@ lyrics, duration, tempo, key, time signature, seed — is on one page, in plain
 English, with the trade-off written **beside** each control instead of buried
 in a wiki. Nothing leaves your Mac.
 
+[![The interface](docs/screenshot.png)](docs/screenshot-full.png)
+
+*One page. Click for the whole thing.*
+
 > This is an **unofficial** front-end. It is not made by or affiliated with the
 > ACE-Step team. It does not include the model.
 
@@ -130,6 +134,25 @@ duration 60, tracks 62, give the batch a name, Generate.
 
 ---
 
+## Measured on an M4 Pro (64 GB)
+
+Real numbers from real runs, not estimates. Your Mac will differ, but the
+shape holds: **every render pays a fixed cost before a single second of audio
+exists**, so short tracks are not proportionally cheaper.
+
+| What | Setting | Result |
+|---|---|---|
+| One 120 s track | Turbo, 8 steps, batch 1 | about 50 s |
+| 80 files | Turbo, 30 s each, batch 4 | about 40 min |
+| Same seed at 8 / 16 / 24 steps | Turbo | **byte-identical files**, 43 / 47 / 56 s |
+| MLX vs PyTorch-MPS | same seed and settings | 97 waveform discontinuities vs **3062** |
+
+That third row is why the Steps slider is switched off on Turbo: the extra
+passes are computed and thrown away. The fourth is why MLX is the default.
+
+
+---
+
 ## The controls, in order
 
 ### Caption
@@ -198,12 +221,26 @@ A few decisions that are deliberate, in case they look like oversights:
 
 ---
 
-## Licence
+## Licences and attribution
 
-MIT — see [LICENSE](LICENSE).
+**This front-end** is MIT — see [LICENSE](LICENSE). Do what you like with it.
 
-The model is not included and is not covered by this licence. ACE-Step 1.5 is
-distributed separately under its own terms.
+**ACE-Step 1.5 is not included here** and is not covered by that licence. It is
+downloaded separately by you, from its own project, under its own terms. At the
+time of writing that project ships an **MIT** licence, which unlike several
+other music models places no non-commercial restriction on you — but licences
+change, so check
+[theirs](https://github.com/ace-step/ACE-Step-1.5/blob/main/LICENSE) rather
+than taking my word for it, especially before selling anything you make.
+
+**The model weights** are downloaded from the ACE-Step project on first render
+and stay on your machine.
+
+**Demucs**, used for the optional stem separation, is a separate project with
+its own licence: [adefossez/demucs](https://github.com/adefossez/demucs).
+
+Nothing in this repository is generated audio, and no audio you make with it
+passes through me or anyone else.
 
 ---
 

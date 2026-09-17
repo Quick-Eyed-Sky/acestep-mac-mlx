@@ -986,7 +986,7 @@ def labelled(title, info, factory, text_scale=2, control_scale=3):
 
 with gr.Blocks(title="ACE-Step for Mac") as demo:
     gr.Markdown(
-        f"## AceStep {VERSION}\n"
+        f"## ACE-Step for Mac {VERSION}\n"
         f"Words in, a song out - or a cover of audio you already have. Straight generation "
         f"only: this model takes no chords, no melody and no MIDI.\n\n"
         f"Model: **{MODEL_FAMILY}** - Apple Silicon build, language model on MLX. Tracks "

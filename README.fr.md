@@ -7,6 +7,10 @@ modèle — description, paroles, durée, tempo, tonalité, métrique, seed — 
 sur une seule page, en clair, avec le compromis écrit **à côté** de chaque
 réglage plutôt qu'enterré dans un wiki. Rien ne sort de votre Mac.
 
+[![L'interface](docs/screenshot.png)](docs/screenshot-full.png)
+
+*Une seule page. Cliquer pour la voir en entier.*
+
 > Interface **non officielle**. Elle n'est ni faite par l'équipe ACE-Step ni
 > affiliée à elle. Elle ne contient pas le modèle.
 
@@ -134,6 +138,26 @@ durée 60, 62 morceaux, nommer le lot, Generate.
 
 ---
 
+## Mesuré sur un M4 Pro (64 Go)
+
+De vrais chiffres, pas des estimations. Votre Mac sera différent, mais la forme
+reste : **chaque rendu paie un coût fixe avant la moindre seconde d'audio**,
+donc un morceau court ne coûte pas proportionnellement moins cher.
+
+| Quoi | Réglages | Résultat |
+|---|---|---|
+| Un morceau de 120 s | Turbo, 8 étapes, batch 1 | environ 50 s |
+| 80 fichiers | Turbo, 30 s chacun, batch 4 | environ 40 min |
+| Même seed à 8 / 16 / 24 étapes | Turbo | **fichiers identiques à l'octet**, 43 / 47 / 56 s |
+| MLX contre PyTorch-MPS | mêmes seed et réglages | 97 discontinuités contre **3062** |
+
+La troisième ligne explique pourquoi le curseur Steps est désactivé sur Turbo :
+les passes supplémentaires sont calculées puis jetées. La quatrième explique
+pourquoi MLX est le défaut.
+
+
+---
+
 ## Les réglages, dans l'ordre
 
 ### Description (Caption)
@@ -205,12 +229,27 @@ Quelques décisions volontaires, au cas où elles ressembleraient à des oublis 
 
 ---
 
-## Licence
+## Licences et attribution
 
-MIT — voir [LICENSE](LICENSE).
+**Cette interface** est en MIT — voir [LICENSE](LICENSE). Faites-en ce que vous
+voulez.
 
-Le modèle n'est pas inclus et n'est pas couvert par cette licence. ACE-Step 1.5
-est distribué séparément, sous ses propres termes.
+**ACE-Step 1.5 n'est pas inclus ici** et n'est pas couvert par cette licence.
+C'est vous qui le téléchargez, depuis son propre projet, sous ses propres
+termes. À l'heure où j'écris, ce projet est en **MIT**, ce qui — contrairement
+à plusieurs autres modèles de musique — ne vous impose aucune restriction non
+commerciale. Mais les licences changent : allez voir
+[la leur](https://github.com/ace-step/ACE-Step-1.5/blob/main/LICENSE) plutôt
+que de me croire sur parole, surtout avant de vendre quoi que ce soit.
+
+**Les poids du modèle** sont téléchargés depuis le projet ACE-Step au premier
+rendu et restent sur votre machine.
+
+**Demucs**, qui fait la séparation en stems en option, est un projet séparé
+avec sa propre licence : [adefossez/demucs](https://github.com/adefossez/demucs).
+
+Rien dans ce dépôt n'est de l'audio généré, et aucun son que vous faites avec
+ne passe par moi ni par personne.
 
 ---
 
