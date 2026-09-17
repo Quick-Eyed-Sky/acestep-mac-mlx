@@ -1042,7 +1042,9 @@ with gr.Blocks(title="ACE-Step for Mac") as demo:
                             "track into.*")
 
             gr.Markdown("### \N{PENCIL} What to make")
-            gr.Markdown(f"*{PROMPT_HELP}*")
+            gr.Markdown(PROMPT_HELP)   # NOT italic: it is four paragraphs now,
+                                       # and a blank line closes an italic run,
+                                       # which printed the asterisks as text.
             caption = gr.Textbox(label="Caption", lines=5, elem_classes=["resizable"],
                                  placeholder="Dream pop, warm analog synths, brushed drums, "
                                              "female vocal, hazy and unhurried",

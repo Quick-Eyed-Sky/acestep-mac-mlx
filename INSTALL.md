@@ -2,12 +2,13 @@
 
 **This guide assumes you have never opened Terminal in your life.** Every
 command is written out in full. After each one you press Return and you wait
-until the prompt comes back before typing the next. If you have installed
-developer tools before, skip to [the short version](#the-short-version) at the
-bottom.
+until the prompt comes back before typing the next.
 
 Total time: about an hour, of which fifty minutes is downloading while you do
 something else.
+
+⚡ **In a hurry, and you already use a Terminal?** Everything fits in six lines —
+[jump to the short version at the bottom ⬇️](#-the-short-version).
 
 ---
 
