@@ -19,6 +19,38 @@ in a wiki. Nothing leaves your Mac.
 
 ---
 
+## 🆕 New in 1.7
+
+**The XL family.** ACE-Step publishes a second, larger branch - 4B parameters
+against 1B - and it is in the Audio model menu, with its cost in the label
+because a dropdown should never start a 19 GB download in silence. Measured
+here, and this was the open question: **MLX accepts XL.** `[MLX-DiT] Native MLX
+DiT decoder initialized successfully`, loaded in 19 seconds, no quantization and
+no CPU offload. There is no separate MLX conversion to hunt for - ACE-Step
+builds its MLX decoder from the model's own config, so it follows XL to its
+larger size on its own.
+
+**The app now reports what MLX actually did**, not what the checkbox asked for.
+ACE-Step sets `use_mlx_dit` back to False, non-fatally, when the MLX decoder
+will not build - so a render could fall back to PyTorch-MPS without a word while
+the `.txt` beside it still claimed MLX. The log says which path ran, and the
+sidecar records the truth.
+
+**Two buttons for "where did it go?"** - the outputs folder from the run bar,
+and the track you are listening to, selected in the Finder.
+
+**Gradio was quietly eating the disk.** It keeps its own copy of every file it
+serves to the browser and never tidies up: three days of batches left **6.8 GB**
+behind. `delete_cache` alone does not fix it - it only knows the files that one
+process created, so a restart cleared none of it. The app now sweeps the folder
+itself at startup, and only ever a folder literally named `gradio`.
+
+**The language-model menu says what each one costs** in gigabytes, so you can
+add it to the audio model's size and see whether the sum fits your Mac, instead
+of reading a number that was true of the author's.
+
+---
+
 ## 🤔 Why this exists
 
 ACE-Step 1.5 is a delight and it is also slightly wild. The first thing anyone

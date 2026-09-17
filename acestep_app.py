@@ -36,6 +36,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 from dataclasses import fields
@@ -43,7 +44,7 @@ from pathlib import Path
 
 import gradio as gr
 
-VERSION = "1.6"
+VERSION = "1.7"
 MODEL_FAMILY = "ACE-Step 1.5"
 MAX_TRACKS = 100
 
@@ -58,21 +59,121 @@ CKPT_DIR = Path(os.environ.get("ACESTEP_CHECKPOINTS_DIR",
                                Path.home() / "AceStep" / "checkpoints")).expanduser()
 
 
+# ----------------------------------------------------- Gradio's own rubbish --
+
+def sweep_gradio_cache(max_age_hours=6):
+    """Delete Gradio's orphaned temporary copies.
+
+    Gradio keeps its own copy of every file it serves to the browser. The
+    `delete_cache` argument on Blocks looks like the whole answer and is not:
+    it only knows about the files THAT process created, so anything left by a
+    previous run - or by a process that was killed rather than shut down -
+    stays for ever. Measured on an M4 Pro: three days of batches left 6.8 GB
+    behind, and a clean restart with delete_cache set removed none of it.
+
+    So the app sweeps the folder itself when it starts. Six hours by default,
+    because a player still open in another tab points at its cached copy.
+    """
+    folder = os.environ.get("GRADIO_TEMP_DIR")
+    folder = Path(folder) if folder else Path(tempfile.gettempdir()) / "gradio"
+    # Never sweep anything that is not literally Gradio's own folder.
+    if folder.name != "gradio" or not folder.is_dir():
+        return ""
+    cutoff = time.time() - max_age_hours * 3600
+    freed, count = 0, 0
+    for item in folder.rglob("*"):
+        try:
+            if item.is_symlink() or not item.is_file():
+                continue
+            if item.stat().st_mtime < cutoff:
+                size = item.stat().st_size
+                item.unlink()
+                freed += size
+                count += 1
+        except OSError:
+            continue
+    for item in sorted(folder.rglob("*"), key=lambda q: len(q.parts), reverse=True):
+        try:
+            if item.is_dir() and not any(item.iterdir()):
+                item.rmdir()
+        except OSError:
+            continue
+    if not count:
+        return ""
+    return (f"Cleared {count} stale Gradio cache file(s), {freed / 1e9:.1f} GB, from "
+            f"{folder}. They are copies of files you already have - Gradio makes one "
+            f"of everything it shows in the browser and does not tidy up after itself.")
+
+
+# ------------------------------------------------------- where did it go? --
+#
+# The question asked after every batch, and the one the interface answered
+# worst: the path was printed once in the log, at the bottom of a long page,
+# among two hundred other lines.
+#
+# Two buttons, because they answer two different questions. In the run bar,
+# "where did this RUN go" - the folder, opened. Beside the player, "where is
+# the thing I am listening to" - that exact file, selected in its folder.
+
+def _open_in_finder(path, select=False):
+    """`open -R` reveals and selects; `open` on a folder opens it."""
+    try:
+        args = ["open", "-R", str(path)] if select else ["open", str(path)]
+        subprocess.run(args, check=True,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+        return True, ""
+    except Exception as exc:
+        return False, str(exc)
+
+
+def open_run_folder():
+    """Everything this app renders lands in one folder, so there is one to open."""
+    if not OUTPUT_DIR.exists():
+        return f"*`{OUTPUT_DIR}` does not exist yet.*"
+    ok, why = _open_in_finder(OUTPUT_DIR)
+    if not ok:
+        return f"*Could not open `{OUTPUT_DIR}` - {why}*"
+    return f"Opened **{OUTPUT_DIR.name}** in the Finder."
+
+
+def reveal_track(path):
+    """Select the file that is playing, inside whatever folder it landed in."""
+    if not path:
+        return "*Nothing is playing yet.*"
+    path = path if isinstance(path, str) else getattr(path, "name", None)
+    if not path or not Path(path).exists():
+        return "*That file is no longer where it was.*"
+    ok, why = _open_in_finder(path, select=True)
+    if not ok:
+        return f"*Could not reveal it - {why}*"
+    return f"Selected **{Path(path).name}** in the Finder."
+
+
+OPEN_RUN_LABEL = "\N{OPEN FILE FOLDER} Open the outputs folder"
+REVEAL_LABEL = "\N{OPEN FILE FOLDER} Show the track playing, in the Finder"
+
+
 # --------------------------------------------------------------- vocabulary --
 
 DIT_MODELS = {
     "Turbo - fastest, 8 steps (start here)": "acestep-v15-turbo",
     "SFT - slower, better finish": "acestep-v15-sft",
     "Base - slowest, takes a CFG scale": "acestep-v15-base",
+    "XL Turbo - 4B, fuller sound (downloads 19 GB the first time)": "acestep-v15-xl-turbo",
+    "XL SFT - 4B, slower still (downloads 19 GB the first time)": "acestep-v15-xl-sft",
+    "XL Base - 4B, takes a CFG scale (downloads 19 GB the first time)": "acestep-v15-xl-base",
 }
 DEFAULT_DIT = "Turbo - fastest, 8 steps (start here)"
 
+# The sizes are what these actually occupy on disk here, so you can add them
+# to the audio model's own size and see whether the sum fits your Mac. Turbo is
+# 4.5 GB, XL Turbo is 19 GB.
 LM_MODELS = {
-    "0.6B - light, safe on any Mac": "acestep-5Hz-lm-0.6B",
-    "1.7B - better captions, fine on 64 GB": "acestep-5Hz-lm-1.7B",
+    "0.6B - lighter (~1 GB), use it if memory is tight": "acestep-5Hz-lm-0.6B",
+    "1.7B - better captions (~3.5 GB), the one to start with": "acestep-5Hz-lm-1.7B",
     "4B - known to run out of memory on macOS": "acestep-5Hz-lm-4B",
 }
-DEFAULT_LM = "1.7B - better captions, fine on 64 GB"
+DEFAULT_LM = "1.7B - better captions (~3.5 GB), the one to start with"
 
 TIME_SIGNATURES = {
     "Auto - let the model decide": "",
@@ -346,7 +447,9 @@ STOP = StopRequest()
 
 # ------------------------------------------------------------------ engine --
 
-ENGINE = {"dit": None, "llm": None, "dit_name": None, "llm_name": None}
+ENGINE = {"dit": None, "llm": None, "dit_name": None, "llm_name": None,
+          # What MLX actually did, as opposed to what was asked of it.
+          "mlx_real": False}
 
 
 def import_acestep():
@@ -416,7 +519,16 @@ def load_engine(dit_label, lm_label, use_mlx_dit, log, need_llm=True):
         status, ok = result if isinstance(result, tuple) else (str(result), True)
         if not ok:
             raise RuntimeError(f"ACE-Step could not start the audio model:\n{status}")
-        ENGINE["dit"], ENGINE["dit_name"] = dit, want
+        got_mlx = bool(getattr(dit, "use_mlx_dit", False))
+        if use_mlx_dit and not got_mlx:
+            log("  WARNING: MLX refused this audio model and ACE-Step fell back to "
+                "PyTorch-MPS, quietly. The render will work; it will be rougher. "
+                "Measured on the smaller models: 3062 waveform discontinuities against "
+                "97 on MLX.")
+        elif got_mlx:
+            log("  MLX accepted this model.")
+        ENGINE["dit"], ENGINE["mlx_real"] = dit, got_mlx
+        ENGINE["dit_name"] = want
 
     if ENGINE["llm"] is None or ENGINE["llm_name"] != lm_name:
         log(f"Loading the language model ({lm_name}) on the MLX backend.")
@@ -670,7 +782,7 @@ def estimate(tracks, batch, caption_mode, duration, dit_label, steps):
     comes out at about 30 seconds per file."""
     n = total_renders(tracks, batch, caption_mode)
     dur = float(duration) if duration and float(duration) > 0 else 120.0
-    turbo = DIT_MODELS[dit_label] == "acestep-v15-turbo"
+    turbo = DIT_MODELS[dit_label].endswith("turbo")
     per = 28.0 + dur * (0.20 if turbo else 0.90)
     if turbo:
         per *= max(0.6, float(steps) / 8.0)
@@ -843,7 +955,7 @@ def generate(job_mode, dit_label, lm_label, use_mlx_dit, caption, lyrics, instru
             say(f"=== Track {i + 1}/{n} - seed {base_seed} - caption {tag} ===")
             yield out()
 
-            turbo = DIT_MODELS[dit_label_l] != "acestep-v15-base"
+            turbo = not DIT_MODELS[dit_label_l].endswith("base")
             wanted = {
                 "task_type": "cover" if mode == COVER else "text2music",
                 "caption": track_caption.strip()[:512],
@@ -927,8 +1039,9 @@ def generate(job_mode, dit_label, lm_label, use_mlx_dit, caption, lyrics, instru
                 meta = getattr(result, "extra_outputs", {}) or {}
                 write_sidecar(txt, caption=track_caption, lyrics=track_lyrics, lines=[
                     f"Job: {mode}",
+                    # What actually ran, not what the checkbox asked for.
                     f"Audio model: {DIT_MODELS[dit_label_l]} "
-                    f"({'MLX' if now('use_mlx_dit') else 'MPS'})",
+                    f"({'MLX' if ENGINE.get('mlx_real') else 'MPS'})",
                     f"Language model: {LM_MODELS[lm_label_l]} (MLX backend)",
                     f"Caption handling: {variant_label}"
                     f"  [thinking={let_it_rewrite}, use_cot_caption={let_it_rewrite}]",
@@ -999,7 +1112,14 @@ def labelled(title, info, factory, text_scale=2, control_scale=3):
     return component
 
 
-with gr.Blocks(title="ACE-Step for Mac") as demo:
+# Gradio keeps its own copy of every file it serves to the browser, in a
+# temporary folder, and never tidies up on its own: three days of batches left
+# 384 wav copies and 6.8 GB behind. delete_cache says "every hour, throw away
+# copies older than six" - six because a player still on screen points at its
+# cached copy, and deleting that from under it would 404 a track you were about
+# to replay. Restarting the app clears the whole cache outright, which is
+# Gradio's own documented behaviour.
+with gr.Blocks(title="ACE-Step for Mac", delete_cache=(3600, 21600)) as demo:
     gr.Markdown(
         f"## ACE-Step for Mac {VERSION}\n"
         f"Words in, a song out - or a cover of audio you already have. Straight generation "
@@ -1014,7 +1134,10 @@ with gr.Blocks(title="ACE-Step for Mac") as demo:
             generate_btn = gr.Button("Generate", variant="primary", scale=3)
             stop_btn = gr.Button("Stop after this track", variant="stop", scale=1)
         estimate_out = gr.Markdown(estimate(1, 1, AS_TYPED, 120, DEFAULT_DIT, 8))
-        status_out = gr.Textbox(label="Status", lines=1, interactive=False, show_label=False)
+        with gr.Row():
+            open_run_btn = gr.Button(OPEN_RUN_LABEL, size="sm",
+                                     variant="secondary")
+        status_out = gr.Markdown("")
 
     with gr.Group(elem_classes=["live"]):
         gr.Markdown(LIVE_INFO)
@@ -1155,6 +1278,8 @@ with gr.Blocks(title="ACE-Step for Mac") as demo:
 
     gr.Markdown("### \N{SPEAKER WITH THREE SOUND WAVES} Results")
     audio_out = gr.Audio(label="Latest track", type="filepath")
+    reveal_btn = gr.Button(REVEAL_LABEL, size="sm", variant="secondary")
+    where_note = gr.Markdown("")
     files_out = gr.Textbox(label="Files saved this run", lines=4)
     log_out = gr.Textbox(label="Log", lines=14, max_lines=40)
 
@@ -1236,12 +1361,12 @@ with gr.Blocks(title="ACE-Step for Mac") as demo:
         # Turbo ignores inference_steps entirely - proven by three byte-identical
         # renders at 8, 16 and 24. A slider that does nothing is worse than no
         # slider, so it is greyed out rather than left there to be believed in.
-        turbo = DIT_MODELS[dit] == "acestep-v15-turbo"
+        turbo = DIT_MODELS[dit].endswith("turbo")
         return (gr.update(maximum=20 if turbo else 200, value=8 if turbo else 48,
                           interactive=not turbo,
                           label="Steps (ignored by Turbo)" if turbo else "Steps"),
                 gr.update(value=3.0 if turbo else 1.0),
-                gr.update(interactive=DIT_MODELS[dit] == "acestep-v15-base"))
+                gr.update(interactive=DIT_MODELS[dit].endswith("base")))
 
     dit_label.change(steps_for, inputs=dit_label, outputs=[steps, shift, cfg])
     for ctrl in (bpm, bpm_max):
@@ -1327,10 +1452,16 @@ with gr.Blocks(title="ACE-Step for Mac") as demo:
 
     restore_file.change(restore, inputs=restore_file, outputs=RESTORE_TARGETS)
 
+    open_run_btn.click(open_run_folder, outputs=status_out)
+    reveal_btn.click(reveal_track, inputs=audio_out, outputs=where_note)
+
     check_btn.click(check_installation, outputs=check_out)
     generate_btn.click(generate, inputs=ALL_INPUTS,
                        outputs=[audio_out, files_out, log_out, progress_bar])
     stop_btn.click(STOP.request, inputs=None, outputs=status_out)
 
 if __name__ == "__main__":
+    note = sweep_gradio_cache()
+    if note:
+        print(note)
     demo.launch(server_port=PORT, css=CSS)

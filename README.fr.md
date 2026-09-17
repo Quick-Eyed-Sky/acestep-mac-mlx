@@ -19,6 +19,39 @@ réglage plutôt qu'enterré dans un wiki. Rien ne sort de votre Mac.
 
 ---
 
+## 🆕 Nouveautés de la 1.7
+
+**La famille XL.** ACE-Step publie une seconde branche, plus grande — 4 milliards
+de paramètres contre 1 — et elle est dans le menu des modèles audio, avec son
+coût écrit dans l'étiquette : un menu déroulant ne devrait jamais déclencher un
+téléchargement de 19 Go en silence. Mesuré ici, et c'était la question ouverte :
+**MLX accepte XL.** `[MLX-DiT] Native MLX DiT decoder initialized successfully`,
+chargé en 19 secondes, sans quantification et sans délestage. Il n'y a aucune
+conversion MLX à aller chercher — ACE-Step construit son décodeur MLX à partir
+de la configuration du modèle, donc il suit XL jusqu'à sa taille tout seul.
+
+**L'app dit maintenant ce que MLX a réellement fait**, et non ce que la case
+demandait. ACE-Step remet `use_mlx_dit` à False, sans rien casser, quand le
+décodeur MLX ne se construit pas — un rendu pouvait donc retomber sur
+PyTorch-MPS sans un mot, pendant que le `.txt` à côté affirmait « MLX ». Le
+journal dit quel chemin a servi, et le fichier enregistre la vérité.
+
+**Deux boutons pour « où c'est parti ? »** — le dossier de sortie depuis la
+barre de lancement, et le morceau en cours d'écoute, sélectionné dans le Finder.
+
+**Gradio mangeait le disque en silence.** Il garde sa propre copie de chaque
+fichier servi au navigateur et ne range jamais : trois jours de lots ont laissé
+**6,8 Go**. `delete_cache` seul n'y suffit pas — il ne connaît que les fichiers
+créés par ce processus-là, donc un redémarrage n'en a effacé aucun. L'app balaie
+maintenant le dossier elle-même au démarrage, et seulement un dossier qui
+s'appelle littéralement `gradio`.
+
+**Le menu des modèles de langage dit ce que chacun coûte** en gigaoctets, pour
+qu'on puisse l'ajouter à la taille du modèle audio et voir si la somme tient sur
+sa propre machine, au lieu de lire un chiffre vrai pour celle de l'auteur.
+
+---
+
 ## 🤔 Pourquoi cette interface
 
 ACE-Step 1.5 est réjouissant, et il est aussi un peu sauvage. La première chose
